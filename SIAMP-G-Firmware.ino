@@ -4,12 +4,12 @@
 #include <EEPROM.h>
 #include <ArduinoJson.h>
 
-#include "config.h"
-#include "types.h"
-#include "storage.h"
-#include "wifi_manager.h"
-#include "web_server.h"
-#include "device_manager.h"
+#include "src/config.h"
+#include "src/types.h"
+#include "src/storage.h"
+#include "src/wifi_manager.h"
+#include "src/web_server.h"
+#include "src/device_manager.h"
 
 // Variable global para credenciales
 WiFiCredentials credentials;
@@ -22,6 +22,9 @@ void setup() {
   delay(1000);
   
   Serial.println("SIAMP-G Firmware iniciando...");
+  
+  // Inicializar hardware (LED)
+  setupHardware();
   
   // Inicializar EEPROM
   initStorage();

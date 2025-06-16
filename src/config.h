@@ -18,4 +18,10 @@ const int WIFI_CONNECT_TIMEOUT = 10000; // 10 segundos
 const int WIFI_MAX_ATTEMPTS = 20;
 const int SERVER_PORT = 80;
 
+// Configuración de hardware
+const int STATUS_LED_PIN = 2;  // Pin para el LED de estado (GPIO2 es el LED incorporado en muchos ESP32)
+const int CONFIG_MODE_BLINK_INTERVAL = 500;  // Intervalo de parpadeo en modo configuración (ms)
+const int CONNECTING_BLINK_INTERVAL = 200;   // Intervalo de parpadeo en modo conexión (ms)
+const int CONNECTED_BLINK_INTERVAL = 3000;   // Intervalo de parpadeo en modo conectado (ms)
+
 #endif // CONFIG_H

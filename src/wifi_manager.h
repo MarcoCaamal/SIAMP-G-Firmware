@@ -8,6 +8,5 @@
 void setupAccessPoint();
 bool connectToWiFi(const WiFiCredentials &credentials);
 String getStateString(ConnectionState state);
-void scanNetworks(JsonDocument &doc);
 
 #endif // WIFI_MANAGER_H

@@ -20,12 +20,10 @@ void setupConfigServer(WiFiCredentials &credentials, ConnectionState &currentSta
   // Guardar referencias a las variables globales
   globalCredentials = &credentials;
   globalState = &currentState;
-  
-  server.on("/", HTTP_GET, []() { handleApiInfo(*globalCredentials, *globalState); });
+    server.on("/", HTTP_GET, []() { handleApiInfo(*globalCredentials, *globalState); });
   server.on("/config", HTTP_POST, []() { handleConfig(*globalCredentials); });
   server.on("/status", HTTP_GET, []() { handleStatus(*globalCredentials, *globalState); });
   server.on("/reset", HTTP_POST, []() { handleReset(*globalCredentials); });
-  server.on("/networks", HTTP_GET, handleNetworkScan);
   server.onNotFound(handleNotFound);
   
   server.begin();
@@ -64,12 +62,10 @@ void handleApiInfo(const WiFiCredentials &credentials, ConnectionState currentSt
     doc["ap_ssid"] = AP_SSID;
     doc["ap_ip"] = WiFi.softAPIP().toString();
     doc["configured"] = credentials.configured;
-    
-    // Información sobre endpoints disponibles
+      // Información sobre endpoints disponibles
     JsonArray endpoints = doc.createNestedArray("endpoints");
     endpoints.add("/config [POST] - Set WiFi configuration");
     endpoints.add("/status [GET] - Get device status");
-    endpoints.add("/networks [GET] - Scan available networks");
     endpoints.add("/reset [POST] - Reset configuration");
   } else {
     doc["message"] = "Device in normal operation mode";
@@ -195,16 +191,6 @@ void handleReset(WiFiCredentials &credentials) {
     serializeJson(responseDoc, response);
     server.send(400, "application/json", response);
   }
-}
-
-// Escaneo de redes WiFi disponibles
-void handleNetworkScan() {
-  DynamicJsonDocument doc(2048);
-  scanNetworks(doc);
-  
-  String response;
-  serializeJson(doc, response);
-  server.send(200, "application/json", response);
 }
 
 // Manejar datos en modo normal - Mejorado

@@ -3,6 +3,9 @@
 
 #include "types.h"
 
+// Inicialización del hardware
+void setupHardware();
+
 // Funciones para manejar los estados del dispositivo
 void handleConfigMode();
 void handleConnecting();

@@ -50,34 +50,3 @@ String getStateString(ConnectionState state) {
     default: return "UNKNOWN";
   }
 }
-
-void scanNetworks(JsonDocument &doc) {
-  Serial.println("Scanning WiFi networks...");
-  
-  doc["scanning"] = true;
-  doc["message"] = "Scanning for available networks...";
-  
-  int networks = WiFi.scanNetworks();
-  
-  if (networks == 0) {
-    doc["scanning"] = false;
-    doc["count"] = 0;
-    doc["message"] = "No networks found";
-  } else {
-    doc["scanning"] = false;
-    doc["count"] = networks;
-    doc["message"] = "Networks found";
-    
-    JsonArray networkArray = doc.createNestedArray("networks");
-    
-    for (int i = 0; i < networks; i++) {
-      JsonObject network = networkArray.createNestedObject();
-      network["ssid"] = WiFi.SSID(i);
-      network["rssi"] = WiFi.RSSI(i);
-      network["encryption"] = (WiFi.encryptionType(i) == WIFI_AUTH_OPEN) ? "open" : "encrypted";
-      network["channel"] = WiFi.channel(i);
-    }
-  }
-  
-  WiFi.scanDelete(); // Limpiar resultados del scan
-}

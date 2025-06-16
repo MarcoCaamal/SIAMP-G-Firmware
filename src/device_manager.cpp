@@ -2,44 +2,58 @@
 #include "device_manager.h"
 #include "web_server.h"
 #include "wifi_manager.h"
+#include "config.h"
+
+// Variable para controlar el estado del LED
+static bool ledState = false;
+
+void setupHardware() {
+  // Configurar el pin del LED como salida
+  pinMode(STATUS_LED_PIN, OUTPUT);
+  
+  // Inicialmente apagar el LED
+  digitalWrite(STATUS_LED_PIN, LOW);
+  
+  Serial.println("Hardware inicializado");
+}
 
 void handleConfigMode() {
   // Parpadear LED para indicar modo configuración
   static unsigned long lastBlink = 0;
-  if (millis() - lastBlink > 500) {
+  if (millis() - lastBlink > CONFIG_MODE_BLINK_INTERVAL) {
     lastBlink = millis();
-    // Aquí puedes agregar código para parpadear un LED
+    ledState = !ledState;
+    digitalWrite(STATUS_LED_PIN, ledState);
   }
 }
 
 void handleConnecting() {
-  // Código para manejar estado de conexión
-  // Por ejemplo, parpadeo de LED más rápido
+  // Parpadeo rápido de LED para indicar intento de conexión
   static unsigned long lastBlink = 0;
-  if (millis() - lastBlink > 200) {
+  if (millis() - lastBlink > CONNECTING_BLINK_INTERVAL) {
     lastBlink = millis();
-    // Aquí puedes agregar código para parpadear un LED más rápido
+    ledState = !ledState;
+    digitalWrite(STATUS_LED_PIN, ledState);
   }
 }
 
 void handleConnected() {
-  // Código para manejar estado conectado
-  // Aquí puedes agregar lógica para enviar datos al servidor
-  
-  // Por ejemplo, un LED encendido fijo o parpadeo lento para indicar actividad
+  // LED con parpadeo muy lento para indicar estado conectado
   static unsigned long lastBlink = 0;
-  if (millis() - lastBlink > 3000) {
+  if (millis() - lastBlink > CONNECTED_BLINK_INTERVAL) {
     lastBlink = millis();
-    // Aquí puedes agregar código para parpadear un LED lentamente
+    ledState = !ledState;
+    digitalWrite(STATUS_LED_PIN, ledState);
   }
   
   // Aquí podrías implementar lógica para enviar datos periódicamente al servidor
 }
 
 void handleFailed() {
+  // Para fallo de conexión, mantener el LED apagado
+  digitalWrite(STATUS_LED_PIN, LOW);
+  
   // Código para manejar fallo de conexión
   Serial.println("Conexión fallida, volviendo a modo configuración...");
   setupAccessPoint();
-  
-  // Aquí podrías agregar código para indicar fallo con LED
 }
