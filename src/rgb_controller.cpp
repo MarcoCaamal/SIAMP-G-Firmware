@@ -11,16 +11,21 @@ static RGBState currentState = {
 
 // Configuración inicial del controlador RGB
 void setupRGBController() {
-  // Configurar los canales PWM utilizando la nueva API de ESP32 v3.0.4
-  // ledcAttach(pin, frecuencia, resolución)
-  ledcAttach(RGB_RED_PIN, PWM_FREQUENCY, PWM_RESOLUTION);
-  ledcAttach(RGB_GREEN_PIN, PWM_FREQUENCY, PWM_RESOLUTION);
-  ledcAttach(RGB_BLUE_PIN, PWM_FREQUENCY, PWM_RESOLUTION);
+  // Configurar pines como salidas
+  pinMode(RGB_RED_PIN, OUTPUT);
+  pinMode(RGB_GREEN_PIN, OUTPUT);
+  pinMode(RGB_BLUE_PIN, OUTPUT);
+  
+  // Asegurarse de que los pines estén inicialmente en nivel bajo
+  digitalWrite(RGB_RED_PIN, LOW);
+  digitalWrite(RGB_GREEN_PIN, LOW);
+  digitalWrite(RGB_BLUE_PIN, LOW);
   
   // Inicialmente apagado
   turnOffRGB();
   
-  Serial.println("Controlador RGB inicializado");
+  Serial.println("Controlador RGB inicializado en pines:");
+  Serial.printf("R: %d, G: %d, B: %d\n", RGB_RED_PIN, RGB_GREEN_PIN, RGB_BLUE_PIN);
 }
 
 // Obtener el estado actual del RGB
@@ -64,26 +69,33 @@ void setRGBBrightness(uint8_t brightness) {
 // Actualizar la salida física del LED RGB
 void updateRGBOutput() {
   if (currentState.isOn) {
-    // Aplicar el brillo al color
-    float factor = currentState.brightness / 100.0;
+    // Calcular el factor de brillo (0-100 a 0-255)
+    int pwmMax = 255;
+    int pwmFactor = (currentState.brightness * pwmMax) / 100;
     
-    uint8_t r = currentState.color.r * factor;
-    uint8_t g = currentState.color.g * factor;
-    uint8_t b = currentState.color.b * factor;
+    // Aplicar el factor de brillo a cada componente RGB
+    // Usamos los colores originales para mantener la proporción correcta
+    int r = (currentState.color.r * pwmFactor) / 255;
+    int g = (currentState.color.g * pwmFactor) / 255;
+    int b = (currentState.color.b * pwmFactor) / 255;
     
-    // Usar la nueva API de ESP32 v3.0.4 para controlar PWM
-    // En la nueva API, ledcWrite toma directamente el pin como parámetro
-    ledcWrite(RGB_RED_PIN, r);
-    ledcWrite(RGB_GREEN_PIN, g);
-    ledcWrite(RGB_BLUE_PIN, b);
+    // Usar analogWrite para controlar cada componente
+    analogWrite(RGB_RED_PIN, r);
+    analogWrite(RGB_GREEN_PIN, g);
+    analogWrite(RGB_BLUE_PIN, b);
     
-    Serial.printf("LED RGB: ON, Color: (%d,%d,%d), Brillo: %d%%\n", 
-                 r, g, b, currentState.brightness);
-  } else {
-    // Apagar todos los LED
-    ledcWrite(RGB_RED_PIN, 0);
-    ledcWrite(RGB_GREEN_PIN, 0);
-    ledcWrite(RGB_BLUE_PIN, 0);
+    Serial.printf("LED RGB: ON, Color RGB: (%d,%d,%d), Brillo: %d%%, Salida PWM: (%d,%d,%d)\n", 
+                 currentState.color.r, currentState.color.g, currentState.color.b, 
+                 currentState.brightness, r, g, b);  } else {
+    // Apagar todos los LED asegurando que no quede ningún residuo de PWM
+    analogWrite(RGB_RED_PIN, 0);
+    analogWrite(RGB_GREEN_PIN, 0);
+    analogWrite(RGB_BLUE_PIN, 0);
+    
+    // Asegurarse de que los pines estén completamente apagados
+    digitalWrite(RGB_RED_PIN, LOW);
+    digitalWrite(RGB_GREEN_PIN, LOW);
+    digitalWrite(RGB_BLUE_PIN, LOW);
     
     Serial.println("LED RGB: OFF");
   }

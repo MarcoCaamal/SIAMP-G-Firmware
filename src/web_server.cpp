@@ -10,6 +10,12 @@
 #include "rgb_controller.h"
 #include "mqtt_handler.h"
 
+// Declaramos estas funciones para poder usarlas desde web_server.cpp
+extern void publishRGBState();
+
+// Forward declarations para funciones dentro de este archivo
+void handleRGBControlWeb();
+
 // Definir la variable global del servidor web (declarada como extern en el .h)
 WebServer server(SERVER_PORT);
 
@@ -51,10 +57,11 @@ void setupMainServer(WiFiCredentials &credentials, ConnectionState &currentState
   server.on("/info", HTTP_GET, []()
             { handleInfo(*globalCredentials); });
   server.on("/status", HTTP_GET, []()
-            { handleStatus(*globalCredentials, *globalState); });
+            { handleStatus(*globalCredentials, *globalState); });  
   server.on("/reset", HTTP_POST, []()
             { handleReset(*globalCredentials); });
-  server.on("/rgb", HTTP_POST, handleRGBControl);
+  server.on("/rgb", HTTP_POST, []()
+            { handleRGBControlWeb(); });
   server.onNotFound(handleNotFound);
 
   server.begin();
@@ -420,6 +427,77 @@ void handleRGBControl()
   String response;
   serializeJson(responseDoc, response);
   server.send(200, "application/json", response);
+}
+
+// Manejar control RGB desde la API web
+void handleRGBControlWeb()
+{
+  if (server.hasArg("plain"))
+  {
+    DynamicJsonDocument doc(256);
+    DeserializationError error = deserializeJson(doc, server.arg("plain"));
+
+    if (error) {
+      server.send(400, "application/json", "{\"success\": false, \"message\": \"JSON inválido\"}");
+      return;
+    }
+
+    RGBState currentState = getRGBState();
+    bool stateChanged = false;
+    
+    // Procesar comando de encendido/apagado
+    if (doc.containsKey("on")) {
+      bool newState = doc["on"].as<bool>();
+      if (currentState.isOn != newState) {
+        currentState.isOn = newState;
+        stateChanged = true;
+      }
+    }
+    
+    // Procesar cambio de brillo
+    if (doc.containsKey("brightness")) {
+      uint8_t newBrightness = doc["brightness"].as<uint8_t>();
+      // Asegurar que está en el rango 0-100
+      newBrightness = constrain(newBrightness, 0, 100);
+      
+      if (currentState.brightness != newBrightness) {
+        currentState.brightness = newBrightness;
+        stateChanged = true;
+      }
+    }
+    
+    // Procesar cambio de color
+    if (doc.containsKey("color")) {
+      uint8_t r = doc["color"]["r"] | currentState.color.r;
+      uint8_t g = doc["color"]["g"] | currentState.color.g;
+      uint8_t b = doc["color"]["b"] | currentState.color.b;
+      
+      if (currentState.color.r != r || currentState.color.g != g || currentState.color.b != b) {
+        currentState.color.r = r;
+        currentState.color.g = g;
+        currentState.color.b = b;
+        stateChanged = true;
+      }
+    }
+    
+    // Aplicar cambios si es necesario
+    if (stateChanged) {
+      setRGBState(currentState);
+      publishRGBState(); // Publicar cambios por MQTT
+    }
+    
+    // Enviar respuesta
+    DynamicJsonDocument responseDoc(256);
+    responseDoc["success"] = true;
+    responseDoc["message"] = "Control RGB aplicado";
+    
+    String response;
+    serializeJson(responseDoc, response);
+    server.send(200, "application/json", response);
+  }
+  else {
+    server.send(400, "application/json", "{\"success\": false, \"message\": \"No se recibieron datos\"}");
+  }
 }
 
 void handleNotFound()
