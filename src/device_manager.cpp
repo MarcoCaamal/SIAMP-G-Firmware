@@ -3,6 +3,8 @@
 #include "web_server.h"
 #include "wifi_manager.h"
 #include "config.h"
+#include "rgb_controller.h"
+#include "mqtt_handler.h"
 
 // Variable para controlar el estado del LED
 static bool ledState = false;
@@ -13,6 +15,9 @@ void setupHardware() {
   
   // Inicialmente apagar el LED
   digitalWrite(STATUS_LED_PIN, LOW);
+  
+  // Inicializar el controlador RGB
+  setupRGBController();
   
   Serial.println("Hardware inicializado");
 }
@@ -46,7 +51,10 @@ void handleConnected() {
     digitalWrite(STATUS_LED_PIN, ledState);
   }
   
-  // Aquí podrías implementar lógica para enviar datos periódicamente al servidor
+  // Procesar mensajes MQTT solo si hay conexión WiFi
+  if (WiFi.status() == WL_CONNECTED) {
+    handleMQTTMessages();
+  }
 }
 
 void handleFailed() {

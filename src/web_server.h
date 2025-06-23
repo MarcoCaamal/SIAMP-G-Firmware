@@ -17,6 +17,7 @@ void handleStatus(const WiFiCredentials &credentials, ConnectionState currentSta
 void handleReset(WiFiCredentials &credentials);
 void handleData();
 void handleInfo(const WiFiCredentials &credentials);
+void handleRGBControl();
 void handleNotFound();
 
 #endif // WEB_SERVER_H
