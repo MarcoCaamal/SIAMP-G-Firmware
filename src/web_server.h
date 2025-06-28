@@ -4,6 +4,10 @@
 #include <WebServer.h>
 #include "types.h"
 
+// Forward declaration para resolver dependencia circular
+class WiFiCredentials;
+enum ConnectionState;
+
 extern WebServer server;
 
 // Funciones para manejar el servidor web
@@ -18,6 +22,10 @@ void handleReset(WiFiCredentials &credentials);
 void handleData();
 void handleInfo(const WiFiCredentials &credentials);
 void handleRGBControl();
+void handleRGBControlWeb();
 void handleNotFound();
+
+// Include debug_handler.h to access handleDebug function
+#include "debug_handler.h"
 
 #endif // WEB_SERVER_H

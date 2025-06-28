@@ -33,8 +33,8 @@ const int PWM_RESOLUTION = 8;  // Resolución PWM (8 bits = 0-255)
 const int PWM_FREQUENCY = 5000; // Frecuencia PWM en Hz
 
 // Configuración MQTT
-const char* const MQTT_DEFAULT_SERVER = "192.168.0.13";  // IP de tu máquina donde corre el broker MQTT
-const int MQTT_PORT = 1883;                                   // Puerto MQTT estándar
+const char* const MQTT_DEFAULT_SERVER = "20.ip.gl.ply.gg";  // IP de tu máquina donde corre el broker MQTT
+const int MQTT_PORT = 46477;                                   // Puerto MQTT estándar
 const char* const MQTT_TOPIC_PREFIX = "siamp-g/";             // Prefijo para los topics MQTT
 const int MQTT_RECONNECT_DELAY = 5000;                        // Tiempo entre intentos de reconexión (ms)
 const char* const MQTT_USERNAME = "siamp_server";             // Usuario MQTT del broker
