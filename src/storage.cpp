@@ -11,16 +11,24 @@ void initStorage() {
 
 void loadCredentials(WiFiCredentials &credentials) {
   EEPROM.get(CREDENTIALS_ADDRESS, credentials);
-  
-  // Verificar si los datos son válidos
+
+  // Validar que el valor de 'configured' sea razonable (true o false)
   if (credentials.configured != true && credentials.configured != false) {
-    // Datos corruptos, inicializar
     memset(&credentials, 0, sizeof(credentials));
     credentials.configured = false;
-    Serial.println("Credenciales no válidas, inicializando...");
-  } else {
-    Serial.println("Credenciales cargadas desde EEPROM");
+    Serial.println("❌ Credenciales no válidas. Inicializando...");
+    return;
   }
+
+  // Asegurar que las cadenas estén null-terminated
+  credentials.ssid[sizeof(credentials.ssid) - 1] = '\0';
+  credentials.password[sizeof(credentials.password) - 1] = '\0';
+
+  Serial.println("✅ Credenciales cargadas desde EEPROM:");
+  Serial.print("SSID: ");
+  Serial.println(credentials.ssid);
+  Serial.print("Password: ");
+  Serial.println(credentials.password);
 }
 
 void saveCredentials(WiFiCredentials &credentials) {

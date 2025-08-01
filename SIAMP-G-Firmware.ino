@@ -29,7 +29,7 @@ ConnectionState previousState = CONFIG_MODE;
 void setup() {
   Serial.begin(115200);
   delay(1000);
-    Serial.println("SIAMP-G Firmware iniciando...");
+  Serial.println("SIAMP-G Firmware iniciando...");
   Serial.print("Versión: ");
   Serial.print(FIRMWARE_VERSION);
   Serial.print(" - ID de dispositivo: ");

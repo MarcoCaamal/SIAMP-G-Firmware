@@ -3,9 +3,9 @@
 
 // Estructura para almacenar credenciales WiFi
 struct WiFiCredentials {
-  char ssid[32];
-  char password[64];
-  char server_url[128];
+  char ssid[33];
+  char password[65];
+  char server_url[129];
   bool configured;
 };
 
